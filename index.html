@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRUTH ENGINE | SYSTEM V5</title>
+    <title>TRUTH ENGINE | WHITE EDITION</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         
-        /* Le Globe est caché au début */
         #canvas-container { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; 
-            opacity: 0; transition: opacity 1s ease; pointer-events: none;
+            opacity: 0; transition: opacity 0.8s ease; pointer-events: none;
         }
         
         #ui-layer {
@@ -19,31 +18,33 @@
         }
 
         .main-box {
-            text-align: center; width: 90%; max-width: 450px; color: white;
+            text-align: center; width: 90%; max-width: 500px; color: #000;
         }
 
-        h1 { letter-spacing: 15px; font-weight: 100; margin-bottom: 30px; transition: 0.5s; }
+        h1 { letter-spacing: 20px; font-weight: 200; margin-bottom: 40px; text-transform: uppercase; color: #000; }
+
+        .input-wrapper { border-bottom: 2px solid #000; margin-bottom: 30px; }
 
         input {
-            width: 100%; background: transparent; border: none; border-bottom: 1px solid #333;
-            color: white; padding: 15px; font-family: monospace; text-align: center; outline: none; font-size: 1rem;
+            width: 100%; background: transparent; border: none;
+            color: #000; padding: 15px; font-family: serif; text-align: center; outline: none; font-size: 1.2rem; font-style: italic;
         }
 
         button {
-            margin-top: 40px; background: none; color: white; border: 1px solid white;
-            padding: 12px 40px; cursor: pointer; letter-spacing: 5px; font-size: 0.8rem; transition: 0.3s;
+            margin-top: 20px; background: #000; color: #fff; border: none;
+            padding: 15px 50px; cursor: pointer; letter-spacing: 4px; font-size: 0.7rem; font-weight: bold; transition: 0.3s;
         }
 
-        button:hover { background: white; color: black; }
+        button:hover { background: #333; transform: scale(1.05); }
 
-        /* Zone de résultat */
-        #result-display { margin-top: 50px; display: none; }
-        .score { font-size: 6rem; font-weight: bold; margin: 0; letter-spacing: -5px; }
-        .label { letter-spacing: 10px; font-size: 0.7rem; color: #666; text-transform: uppercase; }
+        #result-display { margin-top: 50px; display: none; animation: slideUp 1s ease; }
+        @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
 
-        /* Animation de scan */
-        .scanning-text { font-size: 0.7rem; letter-spacing: 3px; color: white; margin-top: 20px; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+        .score { font-size: 8rem; font-weight: 900; margin: 0; letter-spacing: -8px; line-height: 1; color: #000; }
+        .label { letter-spacing: 8px; font-size: 0.6rem; color: #999; text-transform: uppercase; margin-top: 10px; }
+        .verdict-text { font-size: 1.2rem; font-weight: bold; margin-top: 15px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .status-msg { font-size: 0.6rem; letter-spacing: 2px; color: #ccc; margin-top: 20px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -51,25 +52,25 @@
 <div id="canvas-container"></div>
 
 <div id="ui-layer">
-    <div class="main-box" id="ui-content">
-        <h1 id="title">TRUTH</h1>
+    <div class="main-box">
+        <h1 id="title">Truth Engine</h1>
         
         <div id="input-zone">
-            <input type="text" id="userInput" placeholder="ENTRER DONNÉES...">
-            <br>
-            <button onclick="startAnalysis()">ANALYSER</button>
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Saisir la donnée à vérifier...">
+            </div>
+            <button onclick="startAnalysis()">Lancer l'expertise</button>
         </div>
 
         <div id="scanning-zone" style="display:none;">
-            <div class="scanning-text">SCAN NEURONAL EN COURS...</div>
+            <div class="status-msg">Calcul des probabilités factuelles...</div>
         </div>
 
         <div id="result-display">
-            <div class="label">Fiabilité du signal</div>
+            <div class="label">Indice de confiance</div>
             <div class="score" id="final-score">00%</div>
-            <div class="label" id="final-verdict" style="margin-top:10px; color:white;">--</div>
-            <br>
-            <button onclick="location.reload()" style="font-size:0.5rem; padding:5px 15px;">NOUVEAU SCAN</button>
+            <div class="verdict-text" id="final-verdict">--</div>
+            <button onclick="location.reload()" style="background:none; color:#999; border:1px solid #eee; margin-top:40px; padding:10px 20px;">Nouvelle requête</button>
         </div>
     </div>
 </div>
@@ -84,9 +85,9 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // On crée un globe de particules BLANC
-        const geometry = new THREE.SphereGeometry(2, 40, 40);
-        const material = new THREE.PointsMaterial({ color: 0xffffff, size: 0.015 });
+        // GLOBE DE PARTICULES NOIR (Contrastant avec le fond blanc)
+        const geometry = new THREE.SphereGeometry(2, 50, 50);
+        const material = new THREE.PointsMaterial({ color: 0x000000, size: 0.012 });
         particles = new THREE.Points(geometry, material);
         scene.add(particles);
         camera.position.z = 5;
@@ -95,8 +96,8 @@
     function animate() {
         requestAnimationFrame(animate);
         if(particles) {
-            particles.rotation.y += 0.005;
-            particles.rotation.x += 0.002;
+            particles.rotation.y += 0.003;
+            particles.rotation.z += 0.001;
         }
         renderer.render(scene, camera);
     }
@@ -105,27 +106,22 @@
         const val = document.getElementById('userInput').value;
         if(!val) return;
 
-        // 1. Cacher l'input, montrer le globe
         document.getElementById('input-zone').style.display = 'none';
         document.getElementById('scanning-zone').style.display = 'block';
-        document.getElementById('canvas-container').style.opacity = '1';
-        document.getElementById('title').style.letterSpacing = '25px';
+        document.getElementById('canvas-container').style.opacity = '0.15'; // Globe noir subtil
+        document.getElementById('title').style.opacity = '0.1';
 
-        // 2. Simuler l'analyse (3 secondes)
         setTimeout(() => {
-            // Cacher le globe
             document.getElementById('canvas-container').style.opacity = '0';
             document.getElementById('scanning-zone').style.display = 'none';
             
-            // Calcul du score
-            const score = Math.floor(Math.random() * 60) + 40;
+            const score = Math.floor(Math.random() * 65) + 35;
             
-            // Afficher le résultat final en BLANC
             document.getElementById('result-display').style.display = 'block';
             document.getElementById('final-score').innerText = score + "%";
-            document.getElementById('final-verdict').innerText = score > 75 ? "VÉRITÉ CONFIRMÉE" : "ALERTE MANIPULATION";
-            document.getElementById('title').style.opacity = '0.2';
-        }, 3500);
+            document.getElementById('final-verdict').innerText = score > 75 ? "Information Certifiée" : "Divergence Détectée";
+            document.getElementById('title').style.display = 'none';
+        }, 4000);
     }
 
     init3D();
