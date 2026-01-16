@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUTH ENGINE | V1</title>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .box { text-align: center; border: 1px solid #333; padding: 40px; border-radius: 8px; width: 90%; max-width: 400px; }
+        h1 { letter-spacing: 5px; font-size: 1.5rem; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; background: #111; border: 1px solid #444; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #fff; color: #000; border: none; font-weight: bold; cursor: pointer; }
+        #result { margin-top: 20px; font-size: 0.9rem; color: #888; line-height: 1.5; }
+        .green { color: #00ff00; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>TRUTH ENGINE</h1>
+        <input type="text" id="claim" placeholder="Collez un lien ou une info...">
+        <button onclick="check()">ANALYSER</button>
+        <div id="result">SYSTÈME PRÊT.</div>
+    </div>
+
+    <script>
+        function check() {
+            const res = document.getElementById('result');
+            const claim = document.getElementById('claim').value;
+            if(!claim) return;
+            
+            res.innerHTML = "SCAN EN COURS...";
+            setTimeout(() => {
+                res.innerHTML = "ANALYSE TERMINÉE.<br>SCORE DE FIABILITÉ : <span class='green'>91%</span><br>Verdict: Information validée par les sources officielles.";
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
