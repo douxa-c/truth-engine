@@ -3,131 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRUTH ENGINE | NEURAL SURVEILLANCE</title>
+    <title>TRUTH ENGINE | SYSTEM V5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Orbitron', sans-serif; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: sans-serif; }
         
-        /* Overlay UI */
+        /* Le Globe est caché au début */
+        #canvas-container { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; 
+            opacity: 0; transition: opacity 1s ease; pointer-events: none;
+        }
+        
         #ui-layer {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.8) 100%);
-            pointer-events: none;
+            position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; height: 100vh;
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 247, 255, 0.2);
-            padding: 40px;
-            border-radius: 2px;
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-            pointer-events: auto;
-            box-shadow: 0 0 50px rgba(0, 247, 255, 0.1);
+        .main-box {
+            text-align: center; width: 90%; max-width: 450px; color: white;
         }
 
-        h1 {
-            color: #00f7ff;
-            letter-spacing: 15px;
-            font-size: 1.8rem;
-            margin: 0 0 10px 0;
-            text-shadow: 0 0 20px rgba(0, 247, 255, 0.5);
-        }
-
-        .scanner-line {
-            width: 100%;
-            height: 1px;
-            background: #00f7ff;
-            margin: 20px 0;
-            box-shadow: 0 0 10px #00f7ff;
-            animation: scan 2s infinite linear;
-        }
-
-        @keyframes scan { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+        h1 { letter-spacing: 15px; font-weight: 100; margin-bottom: 30px; transition: 0.5s; }
 
         input {
-            width: 100%;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid #333;
-            color: #00f7ff;
-            padding: 15px;
-            font-family: monospace;
-            outline: none;
-            box-sizing: border-box;
-            transition: 0.3s;
+            width: 100%; background: transparent; border: none; border-bottom: 1px solid #333;
+            color: white; padding: 15px; font-family: monospace; text-align: center; outline: none; font-size: 1rem;
         }
-
-        input:focus { border-color: #00f7ff; box-shadow: 0 0 15px rgba(0, 247, 255, 0.3); }
 
         button {
-            width: 100%;
-            margin-top: 20px;
-            padding: 15px;
-            background: #00f7ff;
-            color: #000;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            letter-spacing: 3px;
-            transition: 0.3s;
+            margin-top: 40px; background: none; color: white; border: 1px solid white;
+            padding: 12px 40px; cursor: pointer; letter-spacing: 5px; font-size: 0.8rem; transition: 0.3s;
         }
 
-        button:hover { background: #fff; box-shadow: 0 0 30px #fff; transform: translateY(-2px); }
+        button:hover { background: white; color: black; }
 
-        #status-report {
-            margin-top: 30px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: #666;
-            text-align: left;
-        }
+        /* Zone de résultat */
+        #result-display { margin-top: 50px; display: none; }
+        .score { font-size: 6rem; font-weight: bold; margin: 0; letter-spacing: -5px; }
+        .label { letter-spacing: 10px; font-size: 0.7rem; color: #666; text-transform: uppercase; }
 
-        .score-big {
-            font-size: 5rem;
-            font-weight: bold;
-            color: #fff;
-            margin: 20px 0;
-            text-shadow: 0 0 40px rgba(0, 247, 255, 0.8);
-        }
+        /* Animation de scan */
+        .scanning-text { font-size: 0.7rem; letter-spacing: 3px; color: white; margin-top: 20px; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div id="canvas-container"></div>
 
 <div id="ui-layer">
-    <div class="glass-panel">
-        <h1>TRUTH ENGINE</h1>
-        <div class="subtitle" style="color: #666; font-size: 0.6rem; letter-spacing: 5px; margin-bottom: 20px;">SENSORS ACTIVE // EYE_OF_TRUTH_V5</div>
+    <div class="main-box" id="ui-content">
+        <h1 id="title">TRUTH</h1>
         
-        <input type="text" id="target" placeholder="LIEN OU AFFIRMATION À SCANNER...">
-        <button onclick="process()">DÉMARRER LE SCAN</button>
-
-        <div id="result-area" style="display:none;">
-            <div class="scanner-line"></div>
-            <div id="score-out" class="score-big">--%</div>
-            <div id="verdict-out" style="color:#00f7ff; letter-spacing:2px;">ANALYSE...</div>
+        <div id="input-zone">
+            <input type="text" id="userInput" placeholder="ENTRER DONNÉES...">
+            <br>
+            <button onclick="startAnalysis()">ANALYSER</button>
         </div>
 
-        <div id="status-report">
-            > STANDBY_MODE<br>
-            > EN ATTENTE DE CIBLE...
+        <div id="scanning-zone" style="display:none;">
+            <div class="scanning-text">SCAN NEURONAL EN COURS...</div>
+        </div>
+
+        <div id="result-display">
+            <div class="label">Fiabilité du signal</div>
+            <div class="score" id="final-score">00%</div>
+            <div class="label" id="final-verdict" style="margin-top:10px; color:white;">--</div>
+            <br>
+            <button onclick="location.reload()" style="font-size:0.5rem; padding:5px 15px;">NOUVEAU SCAN</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- ENGINE 3D ---
     let scene, camera, renderer, particles;
     
     function init3D() {
@@ -137,56 +84,48 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        const geometry = new THREE.SphereGeometry(2, 64, 64);
-        const material = new THREE.PointsMaterial({ color: 0x00f7ff, size: 0.02, transparent: true, opacity: 0.8 });
-        
+        // On crée un globe de particules BLANC
+        const geometry = new THREE.SphereGeometry(2, 40, 40);
+        const material = new THREE.PointsMaterial({ color: 0xffffff, size: 0.015 });
         particles = new THREE.Points(geometry, material);
         scene.add(particles);
-
         camera.position.z = 5;
     }
 
     function animate() {
         requestAnimationFrame(animate);
-        particles.rotation.y += 0.002;
-        particles.rotation.x += 0.001;
+        if(particles) {
+            particles.rotation.y += 0.005;
+            particles.rotation.x += 0.002;
+        }
         renderer.render(scene, camera);
     }
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    function startAnalysis() {
+        const val = document.getElementById('userInput').value;
+        if(!val) return;
 
-    // --- LOGIQUE ---
-    function process() {
-        const input = document.getElementById('target').value;
-        if(!input) return;
+        // 1. Cacher l'input, montrer le globe
+        document.getElementById('input-zone').style.display = 'none';
+        document.getElementById('scanning-zone').style.display = 'block';
+        document.getElementById('canvas-container').style.opacity = '1';
+        document.getElementById('title').style.letterSpacing = '25px';
 
-        document.getElementById('result-area').style.display = 'block';
-        document.getElementById('status-report').innerHTML = "> ACCÈS AUX ARCHIVES...<br>> CALCUL DES PROBABILITÉS...";
-        
-        // Effet d'accélération de la 3D pendant le scan
-        let speed = 0.002;
-        const interval = setInterval(() => { speed += 0.01; particles.rotation.y += speed; }, 100);
-
+        // 2. Simuler l'analyse (3 secondes)
         setTimeout(() => {
-            clearInterval(interval);
-            const score = Math.floor(Math.random() * 60) + 40;
-            document.getElementById('score-out').innerText = score + "%";
-            document.getElementById('verdict-out').innerText = score > 75 ? "VÉRITÉ DÉTECTÉE" : "MANIPULATION PROBABLE";
-            document.getElementById('status-report').innerHTML = "> SCAN TERMINÉ.<br>> SOURCE IDENTIFIÉE.<br>> INTÉGRITÉ DU SIGNAL : " + score + "%";
+            // Cacher le globe
+            document.getElementById('canvas-container').style.opacity = '0';
+            document.getElementById('scanning-zone').style.display = 'none';
             
-            // Changement de couleur si c'est faux
-            if(score < 60) {
-                particles.material.color.setHex(0xff003c);
-                document.getElementById('score-out').style.color = "#ff003c";
-            } else {
-                particles.material.color.setHex(0x00f7ff);
-                document.getElementById('score-out').style.color = "#fff";
-            }
-        }, 2500);
+            // Calcul du score
+            const score = Math.floor(Math.random() * 60) + 40;
+            
+            // Afficher le résultat final en BLANC
+            document.getElementById('result-display').style.display = 'block';
+            document.getElementById('final-score').innerText = score + "%";
+            document.getElementById('final-verdict').innerText = score > 75 ? "VÉRITÉ CONFIRMÉE" : "ALERTE MANIPULATION";
+            document.getElementById('title').style.opacity = '0.2';
+        }, 3500);
     }
 
     init3D();
